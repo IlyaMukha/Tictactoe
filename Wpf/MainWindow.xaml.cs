@@ -2,16 +2,18 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Wpf
 {
+    enum GameColors
+    {
+        Player_1, 
+        Player_2, 
+        Tie,
+        Default,
+        Win
+    }
     enum ButtonType
     {
         Cell,
@@ -46,8 +48,8 @@ namespace Wpf
                 button.Tag = ButtonType.Cell;
                 button.Uid = i.ToString();
                 button.Click += Button_Click;
-                button.Background = Brushes.White;
-                button.FontSize = 24;
+                button.Background = GetColor(GameColors.Default);
+                button.FontSize = 36;
                 button.FontWeight = FontWeights.Bold;
                 wrapPanel.Children.Add(button);
             }
@@ -87,12 +89,14 @@ namespace Wpf
             if (Player == 1)
             {
                 Matrix[row, col] = Cell.X;
+                button.Background = GetColor(GameColors.Player_1);
                 button.Content = Drow(Cell.X);
                 Player = 2;
             }
             else
             {
                 Matrix[row, col] = Cell.O;
+                button.Background = GetColor(GameColors.Player_2);
                 button.Content = Drow(Cell.O);
                 Player = 1;
             }
@@ -128,7 +132,7 @@ namespace Wpf
                     Matrix[row, col] = Cell.E;
                     button.IsEnabled = true;
                     button.Click += Button_Click;
-                    button.Background = Brushes.White;
+                    button.Background = GetColor(GameColors.Default);
                     button.Content = "";
                 }
             }
@@ -188,7 +192,7 @@ namespace Wpf
             {
                 if (child is Button button && (ButtonType)button.Tag == ButtonType.Cell)
                 {
-                    button.Background = Brushes.Gray;
+                    button.Background = GetColor(GameColors.Tie);
                     button.Click -= Button_Click;
                 }
             }
@@ -229,12 +233,48 @@ namespace Wpf
                 if (child is Button button && (ButtonType)button.Tag == ButtonType.Cell)
                 {
                     if (button.Uid == index)
-                    {
-                        button.Background = Brushes.Red;
+                    {   
+                        button.Background = GetColor(GameColors.Win);
                     }
                     button.Click -= Button_Click;
                 }
             }
+        }
+        private LinearGradientBrush GetColor(GameColors color)
+        {
+            LinearGradientBrush myBrush = new LinearGradientBrush();
+
+            switch (color)
+            {
+                case GameColors.Player_1:
+                    myBrush.GradientStops.Add(new GradientStop(Colors.DarkGreen, 0.0));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Green, 0.5));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.DarkOliveGreen, 1.0));
+                    break;
+                case GameColors.Player_2:
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Blue, 0.0));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.BlueViolet, 0.5));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.DarkBlue, 1.0));
+                    break;
+                case GameColors.Tie:
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Yellow, 0.0));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Orange, 0.5));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
+                    break;
+                case GameColors.Default:
+                    myBrush.GradientStops.Add(new GradientStop(Colors.White, 0.0));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.White, 0.5));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Gray, 1.0));
+                    break;
+                case GameColors.Win:
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Red, 0.0));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Orange, 0.5));
+                    myBrush.GradientStops.Add(new GradientStop(Colors.Red, 1.0));
+                    break;
+                default:
+                    break;
+            }
+            return myBrush;
         }
     }
 }
