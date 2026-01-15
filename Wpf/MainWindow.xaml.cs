@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -27,7 +29,7 @@ namespace Wpf
     }
     public partial class MainWindow : Window
     {
-        private Cell[,] Matrix {  get; set; }
+        private Cell[][] Matrix {  get; set; } = new Cell[3][];
         private int Player = 1;
         public MainWindow()
         {
@@ -64,11 +66,11 @@ namespace Wpf
         }
         public void InitializeMatrix()
         {
-            Matrix = new Cell[,]
+            Matrix = new Cell[3][]
             {
-                {Cell.E,Cell.E,Cell.E},
-                {Cell.E,Cell.E,Cell.E},
-                {Cell.E,Cell.E,Cell.E},
+                new Cell[] {Cell.E,Cell.E,Cell.E},
+                new Cell[] { Cell.E, Cell.E, Cell.E },
+                new Cell[] { Cell.E, Cell.E, Cell.E },
             };
         }
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -83,24 +85,35 @@ namespace Wpf
             int row = index / 3;
             int col = index % 3;
 
-            if (Matrix[row, col] != Cell.E)
+            if (Matrix[row][col] != Cell.E)
                 return;
 
             if (Player == 1)
             {
-                Matrix[row, col] = Cell.X;
+                Matrix[row][col] = Cell.X;
                 button.Background = GetColor(GameColors.Player_1);
                 button.Content = Drow(Cell.X);
                 Player = 2;
+                // if bot
+                string json = JsonSerializer.Serialize(Matrix);
+                //MessageBox.Show(json);
+                button = Bot();
+                //
             }
             else
             {
-                Matrix[row, col] = Cell.O;
-                button.Background = GetColor(GameColors.Player_2);
-                button.Content = Drow(Cell.O);
-                Player = 1;
+                //if player
+
+                //Matrix[row, col] = Cell.O;
+                //button.Background = GetColor(GameColors.Player_2);
+                //button.Content = Drow(Cell.O);
+                //Player = 1;
+
+                //
             }
-            button.Click -= Button_Click;
+            if(button != null)
+                button.Click -= Button_Click;
+
             CheckWin();
         }
         private string Drow(Cell cell)
@@ -129,7 +142,7 @@ namespace Wpf
                     int index = int.Parse(button.Uid);
                     int row = index / 3;
                     int col = index % 3;
-                    Matrix[row, col] = Cell.E;
+                    Matrix[row][col] = Cell.E;
                     button.IsEnabled = true;
                     button.Click += Button_Click;
                     button.Background = GetColor(GameColors.Default);
@@ -142,7 +155,7 @@ namespace Wpf
         {
             for (int i = 0; i < 3; i++)
             {
-                if (Matrix[i, 0] == Matrix[i,1] && Matrix[i,1] == Matrix[i,2] && Matrix[i,0] != Cell.E)
+                if (Matrix[i][0] == Matrix[i][1] && Matrix[i][1] == Matrix[i][2] && Matrix[i][0] != Cell.E)
                 {
                     DrowWin(GetButton((i, 0)));
                     DrowWin(GetButton((i, 1)));
@@ -150,7 +163,7 @@ namespace Wpf
                     return;
                 }
 
-                if (Matrix[0, i] == Matrix[1, i] && Matrix[1, i] == Matrix[2, i] && Matrix[0, i] != Cell.E)
+                if (Matrix[0][i] == Matrix[1][i] && Matrix[1][i] == Matrix[2][i] && Matrix[0][i] != Cell.E)
                 {
                     DrowWin(GetButton((0, i)));
                     DrowWin(GetButton((1, i)));
@@ -158,14 +171,14 @@ namespace Wpf
                     return;
                 }
             }
-            if (Matrix[0,0] == Matrix[1,1] && Matrix[1,1] == Matrix[2, 2] && Matrix[0, 0] != Cell.E)
+            if (Matrix[0][0] == Matrix[1][1] && Matrix[1][1] == Matrix[2][2] && Matrix[0][0] != Cell.E)
             {
                 DrowWin(GetButton((0, 0)));
                 DrowWin(GetButton((1, 1)));
                 DrowWin(GetButton((2, 2)));
                 return;
             }
-            if (Matrix[2, 0] == Matrix[1, 1] && Matrix[1, 1] == Matrix[0, 2] && Matrix[2, 0] != Cell.E)
+            if (Matrix[2][0] == Matrix[1][1] && Matrix[1][1] == Matrix[0][2] && Matrix[2][0] != Cell.E)
             {
                 DrowWin(GetButton((2, 0)));
                 DrowWin(GetButton((1, 1)));
@@ -173,10 +186,13 @@ namespace Wpf
                 return;
             }
             bool isFull = true;
-            foreach (var item in Matrix)
+            foreach (var matrix in Matrix)
             {
-                if(item == Cell.E)
-                    isFull = false;
+                foreach (var cell in matrix)
+                {
+                    if (cell == Cell.E)
+                        isFull = false;
+                }
             }
             if (isFull)
             {
@@ -197,33 +213,89 @@ namespace Wpf
                 }
             }
         }
-        private string GetButton((int,int) i)
+        private Button GetButton((int,int) i)
         {
+            string uid = string.Empty;
             switch (i)
             {
                 case (0, 0):
-                    return 0.ToString();
+                    uid = 0.ToString();
+                    break;
                 case (0, 1):
-                    return 1.ToString();
+                    uid = 1.ToString();
+                    break;
                 case (0, 2):
-                    return 2.ToString();
+                    uid = 2.ToString();
+                    break;
                 case (1, 0):
-                    return 3.ToString();
+                    uid = 3.ToString();
+                    break;
                 case (1, 1):
-                    return 4.ToString();
+                    uid = 4.ToString();
+                    break;
                 case (1, 2):
-                    return 5.ToString();
+                    uid = 5.ToString();
+                    break;
                 case (2, 0):
-                    return 6.ToString();
+                    uid = 6.ToString();
+                    break;
                 case (2, 1):
-                    return 7.ToString();
+                    uid = 7.ToString();
+                    break;
                 case (2, 2):
-                    return 8.ToString();
-                default:
-                    return 0.ToString();
+                    uid = 8.ToString();
+                    break;
+            }
+
+
+            if (Content is not WrapPanel wrapPanel)
+                return null;
+
+            foreach (var child in wrapPanel.Children)
+            {
+                if (child is Button button && (ButtonType)button.Tag == ButtonType.Cell)
+                {
+                    if (button.Uid == uid)
+                    {
+                        return button;
+                    }
+                }
+            }
+
+            return null;
+        }
+        private (int, int) GetMatrixElement(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return (0, 0);
+                case 1:
+                    return (0, 1);
+                case 2:
+                    return (0, 2);
+                case 3:
+                    return (1, 0);
+                case 4:
+                    return (1, 1);
+                case 5:
+                    return (1, 2);
+                case 6:
+                    return (2, 0);
+                case 7:
+                    return (2, 1);
+                case 8:
+                    return (2, 2);
+                    default:
+                return (0, 0);
             }
         }
-        private void DrowWin(string index)
+        private void DrowWin(Button button)
+        {
+            button.Background = GetColor(GameColors.Win);
+            StopGame();
+        }
+        private void StopGame()
         {
             if (Content is not WrapPanel wrapPanel)
                 return;
@@ -232,10 +304,6 @@ namespace Wpf
             {
                 if (child is Button button && (ButtonType)button.Tag == ButtonType.Cell)
                 {
-                    if (button.Uid == index)
-                    {   
-                        button.Background = GetColor(GameColors.Win);
-                    }
                     button.Click -= Button_Click;
                 }
             }
@@ -275,6 +343,41 @@ namespace Wpf
                     break;
             }
             return myBrush;
+        }
+        private Button Bot()
+        {
+            do
+            {
+                Random random = new Random();
+                int r = random.Next(0, 10);
+                var matrixElement = GetMatrixElement(r);
+                if (Matrix[matrixElement.Item1][matrixElement.Item2] == Cell.E)
+                {
+                    var button = GetButton((matrixElement.Item1, matrixElement.Item2));
+                    Matrix[matrixElement.Item1][matrixElement.Item2] = Cell.O;
+                    button.Background = GetColor(GameColors.Player_2);
+                    button.Content = Drow(Cell.O);
+                    Player = 1;
+                    return button;
+                }
+                else
+                {
+                    bool isFull = true;
+                    foreach (var matrix in Matrix)
+                    {
+                        foreach (var cell in matrix)
+                        {
+                            if (cell == Cell.E)
+                                isFull = false;
+                        }
+                    }
+                    if (isFull)
+                    {
+                        return null;
+                    }
+                }
+            }
+            while (true);
         }
     }
 }
