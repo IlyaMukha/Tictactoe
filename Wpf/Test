@@ -1,0 +1,49 @@
+public void GetValidPositions()
+        {
+            int size = 3;
+            bool[] rowWithX = new bool[size];
+            bool[] columnsWithX = new bool[size];
+            bool diagonal1 = false;
+            bool diagonal2 = false;
+            string result = "";
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if (Matrix[i][j] == Cell.O)
+                    {
+                        rowWithX[i] = true;
+                        columnsWithX[j] = true;
+
+                        if(i == j)
+                        {
+                            diagonal1 = true;
+                        }
+                        if (i + j == 2)
+                        {
+                            diagonal2 = true;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if (Matrix[i][j] != Cell.E)
+                    {
+                        continue;
+                    }
+
+                    bool isValid = rowWithX[i] || columnsWithX[j] || (i == j && diagonal1) || (i + j == 2 && diagonal2);
+
+                    if (isValid)
+                    {
+                        result += $"|{i}, {j}|";
+                    }
+                }
+            }
+            Console.WriteLine(result);
+        }
